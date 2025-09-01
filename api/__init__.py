@@ -2,9 +2,9 @@ import json
 from typing import Union
 
 from .event_dispatcher import *
-from .payload import *
+from ..shared.payload import *
 import time
-from .client import Client
+from ..shared.client import Client
 from .config import Config
 from .device import Device
 from .mouse_key import MouseKey
