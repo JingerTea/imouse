@@ -1,7 +1,7 @@
 import json
 from typing import Union
 
-from .event_dispatcher import *
+from ..shared.event_dispatcher import *
 from ..shared.payload import *
 import time
 from ..shared.client import Client
@@ -15,16 +15,16 @@ from .user import User
 
 
 class API(Client, Device, Config, User, MouseKey, Pic, Shortcut):
-    def __init__(self, host: str, imouse_call_back=None, timeout: int = 15):
-        super().__init__(host, timeout)
+    def __init__(self, host: str, port: int = 9911, imouse_call_back=None, timeout: int = 15):
+        Client.__init__(self, host, port, timeout)
         self._imouse_call_back = imouse_call_back
         self._payload = Payload()
         self._start()
 
     def _start(self):
-        super().start()
+        Client.start(self)
         time.sleep(1)
-        while not self.is_connected():
+        while not Client.is_connected(self):
             logger.debug(f'连接失败,延时1秒等待')
             time.sleep(1)
 
@@ -35,7 +35,7 @@ class API(Client, Device, Config, User, MouseKey, Pic, Shortcut):
             logger.error(f'_handle_message发生异常: {e}')
 
     def _call_api(self, request_dict: dict, timeout: int = 0, is_async: bool = False) -> Union[dict, bytes, None]:
-        ret = self._network_request(json.dumps(request_dict), timeout, is_async)
+        ret = Client._network_request(self, json.dumps(request_dict), timeout, is_async)
         if ret is not None:
             if isinstance(ret, str):
                 return json.loads(ret)
@@ -44,4 +44,4 @@ class API(Client, Device, Config, User, MouseKey, Pic, Shortcut):
         return ret
 
     def _get_payload(self) -> Payload:
-        pass
+        return self._payload

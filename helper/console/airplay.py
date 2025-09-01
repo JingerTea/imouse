@@ -1,15 +1,18 @@
 from typing import TYPE_CHECKING, List
 from ...types import SetDeviceAirplayParams
+from ...shared.base_api import BaseAPI
+from ...models import ImServerConfigResponse, CommonResponse
 
 if TYPE_CHECKING:
     from . import Console
-    from imouse import API
 
 
-class AirPlay:
+class AirPlay(BaseAPI):
     def __init__(self, console: "Console"):
+        super().__init__()
         self._console = console
-        self._api: "API" = console._helper._api
+        self._client = console._helper._client
+        self._payload = console._helper._payload
 
     def global_config(
             self,
@@ -29,7 +32,7 @@ class AirPlay:
         for key, value in update_map.items():
             if value is not None:
                 setattr(config, key, value)
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def config(
             self,
@@ -48,43 +51,43 @@ class AirPlay:
             audio=audio,
             img_fps=img_fps
         )
-        return self._console.successful(self._api.device_airplay_set(device_ids, params))
+        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_set, device_ids, params))
 
     def connect(self, device_ids: str) -> bool:
         """指定设备的投屏"""
-        return self._console.successful(self._api.device_airplay_connect(device_ids))
+        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_connect, device_ids))
 
     def connect_all(self) -> bool:
         """让所有离线的设备投屏"""
-        return self._console.successful(self._api.device_airplay_connect_all())
+        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_connect_all))
 
     def disconnect(self, device_ids: str) -> bool:
         """断开指定设备的投屏"""
-        return self._console.successful(self._api.device_airplay_disconnect(device_ids))
+        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_disconnect, device_ids))
 
     def name(self, name: str) -> bool:
         """设置 AirPlay 的显示名称"""
         config = self._console.get_imserver_config
         config.air_play_name = name
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def auto_connect(self, state: bool) -> bool:
         """设置是否自动连接设备"""
         config = self._console.get_imserver_config
         config.auto_connect = state
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def failed_retry(self, num: int) -> bool:
         """设置连接失败后的重试次数"""
         config = self._console.get_imserver_config
         config.connect_failed_retry = num
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def gpu_decoding(self, state: bool) -> bool:
         """设置是否启用 GPU 硬件解码"""
         config = self._console.get_imserver_config
         config.enable_hardware_acceleration = state
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def set_mdns_type(self, mdns_type: int, ip_list: List[str] = None) -> bool:
         """设置 mDNS 类型及允许的 IP 列表"""
@@ -93,8 +96,8 @@ class AirPlay:
         if ip_list is not None:
             config.allow_ip_list = ip_list
 
-        return self._console.successful(self._api.config_imserver_set(config))
+        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
 
     def restart_mdns(self) -> bool:
         """重新广播投屏"""
-        return self._console.successful(self._api.imserver_regmdns())
+        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.imserver_regmdns))

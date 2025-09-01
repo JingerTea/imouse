@@ -1,6 +1,8 @@
+import json
 from typing import TYPE_CHECKING, Optional
 
-from ...models import ImServerConfigData
+from ...models import ImServerConfigData, ImServerConfigResponse, CommonResponse
+from ...utils.utils import parse_model
 
 if TYPE_CHECKING:
     from . import Helper
@@ -16,6 +18,8 @@ from .user import User
 class Console:
     def __init__(self, helper: "Helper"):
         self._helper = helper
+        self._client = helper._client
+        self._payload = helper._payload
         self._imserver_config = self.get_imserver_config
         self._error_code: Optional[int] = None
         self._error_msg: Optional[str] = None
@@ -45,11 +49,18 @@ class Console:
             return False
 
     def restart_core(self) -> bool:
-        return self.successful(self._helper._api.imserver_restart())
+        response = self._client._network_request(
+            json.dumps(self._payload.imserver_restart())
+        )
+        ret = parse_model(CommonResponse, json.loads(response))
+        return self.successful(ret)
 
     @property
     def get_imserver_config(self) -> ImServerConfigData:
-        ret = self._helper._api.config_imserver_get()
+        response = self._client._network_request(
+            json.dumps(self._payload.config_imserver_get())
+        )
+        ret = parse_model(ImServerConfigResponse, json.loads(response))
         if self.successful(ret):
             self._imserver_config = ret.data
         else:

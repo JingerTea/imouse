@@ -14,7 +14,7 @@ from ..utils.utils import safe_json_log
 class Client:
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, host: str, timeout: int = 15):
+    def __init__(self, host: str, port: int, timeout: int = 15):
         """
         初始化 Client 类。
 
@@ -23,7 +23,8 @@ class Client:
         """
         self._global_timeout = timeout
         self.host = host
-        self.base_url = f'http://{host}:9911/api'
+        self.port = port
+        self.base_url = f'http://{host}:{port}/api'
         self._ws = WebSocketApp
         self._is_working = False
         self._is_connected = False
@@ -141,7 +142,7 @@ class Client:
         """
         初始化 WebSocket 连接。
         """
-        self._ws = websocket.WebSocketApp(f'ws://{self.host}:9911/api',
+        self._ws = websocket.WebSocketApp(f'ws://{self.host}:{self.port}/api',
                                           on_data=self._on_data,
                                           on_error=self._on_error,
                                           on_open=self._on_open,

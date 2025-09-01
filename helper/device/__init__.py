@@ -1,9 +1,12 @@
+import json
 from typing import Optional, TYPE_CHECKING
 from .image import Image
 from .keyboard import KeyBoard
 from .mouse import Mouse
 from .shortcut import Shortcut
-from ...models import DeviceInfo
+from ...models import DeviceInfo, DeviceListResponse
+from ...shared.payload import Payload
+from ...utils.utils import parse_model
 
 if TYPE_CHECKING:
     from . import Helper
@@ -12,7 +15,8 @@ if TYPE_CHECKING:
 class Device:
     def __init__(self, helper: "Helper", device_id: str, device_info: DeviceInfo = None):
         self._helper = helper
-        self._api = helper._api
+        self._client = helper._client
+        self._payload = helper._payload
         self._device_info = device_info
         if self._device_info:
             self.device_id = self._device_info.device_id
@@ -101,7 +105,10 @@ class Device:
         从服务器重新获取设备信息，并更新内部缓存。
         当设备状态发生变化时（如分辨率、名称等），可调用此方法同步最新信息。
         """
-        ret = self._api.device_get(self.device_id)
+        response = self._client._network_request(
+            json.dumps(self._payload.device_get(self.device_id))
+        )
+        ret = parse_model(DeviceListResponse, json.loads(response))
         if self.successful(ret) and len(ret.data.device_list) > 0:
             self._device_info = ret.data.device_list[0]
 
