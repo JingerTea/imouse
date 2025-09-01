@@ -1,5 +1,5 @@
-from imouse.models.response import ImServerConfigData
-from imouse.types import SetDeviceParams, SetDeviceAirplayParams, MouseSwipeParams, MultiColorParams, \
+from ..models.response import ImServerConfigData
+from ..types import SetDeviceParams, SetDeviceAirplayParams, MouseSwipeParams, MultiColorParams, \
     AlbumFileParams, PhoneFileParams
 
 from typing import Optional, List

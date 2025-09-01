@@ -7,8 +7,8 @@ import requests
 import websocket
 from websocket import WebSocketApp, WebSocketException
 
-from imouse.utils import logger
-from imouse.utils.utils import safe_json_log
+from ..utils import logger
+from ..utils.utils import safe_json_log
 
 
 class Client:

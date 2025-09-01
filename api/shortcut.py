@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import Union, List
 
-from imouse.models import CommonResponse, AlbumFileResponse, PhoneFileResponse, ResultTextResponse
-from imouse.api import Payload
-from imouse.types import AlbumFileParams, PhoneFileParams
-from imouse.utils.utils import parse_model
+from ..models import CommonResponse, AlbumFileResponse, PhoneFileResponse, ResultTextResponse
+from ..api import Payload
+from ..types import AlbumFileParams, PhoneFileParams
+from ..utils.utils import parse_model
 
 
 class Shortcut():

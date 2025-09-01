@@ -1,10 +1,10 @@
 from abc import abstractmethod
 from typing import Optional, List, Union
 
-from imouse.models import CommonResponse
-from imouse.api import Payload
-from imouse.types import MouseSwipeParams
-from imouse.utils.utils import parse_model
+from ..models import CommonResponse
+from ..api import Payload
+from ..types import MouseSwipeParams
+from ..utils.utils import parse_model
 
 
 class MouseKey():

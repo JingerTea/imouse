@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from typing import Optional, Union
 
-from imouse.models import UsbListResponse, ImServerConfigResponse, ImServerConfigData, CommonResponse
-from imouse.api import Payload
-from imouse.utils.utils import parse_model
+from ..models import UsbListResponse, ImServerConfigResponse, ImServerConfigData, CommonResponse
+from ..api import Payload
+from ..utils.utils import parse_model
 
 
 class Config():

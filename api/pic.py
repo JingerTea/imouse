@@ -1,11 +1,11 @@
 from abc import abstractmethod
 from typing import List, Union
 
-from imouse.models import CommonResponse, FindImageResultResponse, FindImageCvResultResponse, OcrResultResponse, \
+from ..models import CommonResponse, FindImageResultResponse, FindImageCvResultResponse, OcrResultResponse, \
     FindMultiColorResponse
-from imouse.api import Payload
-from imouse.types import MultiColorParams
-from imouse.utils.utils import parse_model
+from ..api import Payload
+from ..types import MultiColorParams
+from ..utils.utils import parse_model
 
 
 class Pic():

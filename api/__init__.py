@@ -8,7 +8,7 @@ from .client import Client
 from .config import Config
 from .device import Device
 from .mouse_key import MouseKey
-from imouse.utils import logger
+from ..utils import logger
 from .pic import Pic
 from .shortcut import Shortcut
 from .user import User

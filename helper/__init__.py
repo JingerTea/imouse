@@ -1,17 +1,18 @@
-import imouse
+from ..api import API
 from .device import Device
 from .console import Console
 from ..models import DeviceInfo
 
 
 class Helper:
-    def __init__(self, api: imouse.API):
+    def __init__(self, api: API):
         self._api = api
 
     @property
     def console(self):
         return Console(self)
 
+    
     def device(self, device_id: str, device_info: DeviceInfo = None):
         return Device(self, device_id, device_info)
 

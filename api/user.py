@@ -1,9 +1,9 @@
 from abc import abstractmethod
 from typing import Optional, Union
 
-from imouse.models import CommonResponse, UserResponse
-from imouse.api import Payload
-from imouse.utils.utils import parse_model
+from ..models import CommonResponse, UserResponse
+from ..api import Payload
+from ..utils.utils import parse_model
 
 
 class User():

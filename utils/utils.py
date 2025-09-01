@@ -5,8 +5,8 @@ from typing import TypeVar, Optional, Type
 
 from pydantic import BaseModel, ValidationError
 
-from imouse.models import CommonResponse
-from imouse.utils import logger
+from ..models import CommonResponse
+from ..utils import logger
 
 T = TypeVar('T', bound=BaseModel)
 

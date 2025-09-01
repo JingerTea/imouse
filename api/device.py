@@ -1,11 +1,11 @@
 from abc import abstractmethod
 from typing import Optional, Union
 
-from imouse.models import DeviceListResponse, IdListResponse, GroupListResponse, CommonResponse, \
+from ..models import DeviceListResponse, IdListResponse, GroupListResponse, CommonResponse, \
     DeviceSortResponse
-from imouse.api import Payload
-from imouse.types import SetDeviceParams, SetDeviceAirplayParams
-from imouse.utils.utils import parse_model
+from ..api import Payload
+from ..types import SetDeviceParams, SetDeviceAirplayParams
+from ..utils.utils import parse_model
 
 
 class Device():
