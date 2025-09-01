@@ -1,5 +1,5 @@
-from ..api import API
-from ..helper import Helper
+from .api import API
+from .helper import Helper
 
 
 def api(host: str = "localhost"):
