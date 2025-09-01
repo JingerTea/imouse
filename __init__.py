@@ -6,8 +6,8 @@ def api(host: str = "localhost"):
     return API(host)
 
 
-def helper(api: API):
-    return Helper(api)
+def helper(host: str = "localhost"):
+    return Helper(host)
 
 
 __all__ = ["api", "helper"]

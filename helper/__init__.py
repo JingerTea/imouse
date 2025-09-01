@@ -5,8 +5,8 @@ from ..models import DeviceInfo
 
 
 class Helper:
-    def __init__(self, api: API):
-        self._api = api
+    def __init__(self, host: str):
+        self._api = API(host)
 
     @property
     def console(self):
