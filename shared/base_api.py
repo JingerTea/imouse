@@ -1,82 +1,34 @@
 import json
 from abc import ABC
-from typing import Union, Type, TypeVar, Optional
+from typing import Union, Type, Optional
 
 from ..utils.utils import parse_model
+from ..models import CommonResponse
 from .client import Client
 from .payload import Payload
 
-T = TypeVar('T')
-
 
 class BaseAPI(ABC):
-    """Base class for API operations with common request/response handling"""
+    """API操作基类，直接返回Pydantic模型"""
     
     def __init__(self):
         self._client: Optional[Client] = None
         self._payload: Optional[Payload] = None
-        self._error_code: Optional[int] = None
-        self._error_msg: Optional[str] = None
-    
-    def _set_error(self, code: int, message: str):
-        """Set error code and message"""
-        self._error_code = code
-        self._error_msg = message
-
-    def _clear_error(self):
-        """Clear error code and message"""
-        self._error_code = None
-        self._error_msg = None
-
-    def successful(self, common_response):
-        """Check if API response is successful"""
-        try:
-            if common_response is None:
-                self._set_error(-1, "响应为空")
-                return False
-                
-            if common_response.status != 200:
-                self._set_error(common_response.status, common_response.message)
-                return False
-
-            if common_response.data.code != 0:
-                self._set_error(common_response.data.code, common_response.data.message)
-                return False
-
-            self._clear_error()
-            return True
-        except Exception as e:
-            self._set_error(-1, f"解析响应失败: {e}")
-            return False
-
-    @property
-    def error_code(self) -> Optional[int]:
-        """Get and clear error code"""
-        ret = self._error_code
-        self._error_code = None
-        return ret
-
-    @property
-    def error_msg(self) -> Optional[str]:
-        """Get and clear error message"""
-        ret = self._error_msg
-        self._error_msg = None
-        return ret
     
     def _make_request(self, payload_data: dict, timeout: int = 0, is_async: bool = False) -> Union[str, bytes, None]:
         """
-        Make a network request with the given payload.
+        使用给定载荷发起网络请求
         
         Args:
-            payload_data: The payload dictionary to send
-            timeout: Request timeout in seconds
-            is_async: Whether to make an async request
+            payload_data: 要发送的载荷字典
+            timeout: 请求超时时间（秒）
+            is_async: 是否异步请求
             
         Returns:
-            Response as string, bytes, or None
+            响应数据：字符串、字节或None
         """
         if not self._client:
-            raise RuntimeError("Client not initialized")
+            raise RuntimeError("客户端未初始化")
             
         return self._client._network_request(
             json.dumps(payload_data), 
@@ -84,39 +36,59 @@ class BaseAPI(ABC):
             is_async
         )
     
-    def _call_and_parse(self, response_class: Type[T], payload_method, *args, **kwargs) -> Optional[T]:
+    def call(self, model_class: Type, payload_method, *args, **kwargs):
         """
-        Make a request and parse the response into the specified model.
+        通用API调用方法，直接返回Pydantic模型
         
         Args:
-            response_class: The response model class to parse into
-            payload_method: The payload method to call
-            *args, **kwargs: Arguments for the payload method
+            model_class: 用于解析响应的Pydantic模型类
+            payload_method: 要调用的载荷方法
+            *args, **kwargs: 载荷方法的参数
             
         Returns:
-            Parsed response object or None
+            解析后的Pydantic模型实例，错误时抛出异常
         """
-        # Extract timeout and is_async if provided in kwargs
+        # 从kwargs中提取timeout和is_async参数
         timeout = kwargs.pop('_timeout', 0)
         is_async = kwargs.pop('_is_async', False)
         
-        # Build payload
-        payload_data = payload_method(*args, **kwargs)
-        
-        # Make request
-        response = self._make_request(payload_data, timeout, is_async)
-        
-        if response is None:
-            return None
-            
-        # Handle bytes response (e.g., screenshots)
-        if isinstance(response, bytes):
-            return response  # type: ignore
-            
-        # Parse JSON response
         try:
+            # 构建载荷
+            payload_data = payload_method(*args, **kwargs)
+            
+            # 发起请求
+            response = self._make_request(payload_data, timeout, is_async)
+            
+            if response is None:
+                raise RuntimeError("网络请求失败")
+            
+            # 直接处理截图等方法的字节响应
+            if isinstance(response, bytes):
+                print(f"[调试] 成功 - 二进制响应长度: {len(response)} 字节")
+                return response
+                
+            # 使用指定模型解析JSON响应
             response_dict = json.loads(response) if isinstance(response, str) else response
-            return parse_model(response_class, response_dict)
+            print(f"[调试] JSON响应: {response_dict}")
+            
+            # 特殊情况：如果期望字节但收到JSON，检查错误
+            if model_class == bytes:
+                # 期望字节但收到JSON - 解析为CommonResponse检查错误
+                error_response = parse_model(CommonResponse, response_dict)
+                # 检查是否为错误：code != 0 表示错误
+                if error_response.data and error_response.data.code != 0:
+                    raise RuntimeError(error_response.data.message)
+                else:
+                    raise RuntimeError("期望二进制数据但收到JSON响应")
+            
+            parsed_response = parse_model(model_class, response_dict)
+            return parsed_response
+                
         except (json.JSONDecodeError, ValueError) as e:
-            # Log error if needed
-            return None
+            raise RuntimeError(f"响应解析错误: {e}")
+        except RuntimeError:
+            # 重新抛出RuntimeError（包含我们的有意义错误消息）
+            raise
+        except Exception as e:
+            raise RuntimeError(f"请求异常: {e}")
+

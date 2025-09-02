@@ -32,8 +32,8 @@ class API(BaseAPI):
 
     @property
     def devices(self):
-        device_list_response = self._call_and_parse(DeviceListResponse, self._payload.device_get)
-        if not device_list_response or not device_list_response.data:
+        device_list_response = self.call(DeviceListResponse, self._payload.device_get)
+        if device_list_response.status != 200 or device_list_response.data.code != 0:
             return []
         ret = []
         for data in device_list_response.data.device_list:

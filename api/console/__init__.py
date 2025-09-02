@@ -19,13 +19,13 @@ class Console:
         self._imserver_config = self.get_imserver_config
 
     def restart_core(self) -> bool:
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.imserver_restart)
-        return self._api.successful(ret)
+        ret = self._api.call(CommonResponse, self._api._payload.imserver_restart)
+        return ret.status == 200 and ret.data.code == 0
 
     @property
     def get_imserver_config(self) -> ImServerConfigData:
-        ret = self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_get)
-        if self._api.successful(ret):
+        ret = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_get)
+        if ret.status == 200 and ret.data.code == 0:
             self._imserver_config = ret.data
         else:
             self._imserver_config = None

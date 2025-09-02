@@ -13,44 +13,37 @@ class Mouse:
         self._api = device._api
         self._device_id = device.device_id
 
-    def click(self, x: int, y: int, time: int = 0, button: int = 1) -> bool:
+    def click(self, button: str, x: int, y: int, time: int = 0) -> CommonResponse:
         """点击"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_click,
-                                       self._device_id, str(button), x, y, time)
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_click,
+                             self._device_id, button, x, y, time)
 
-    def swipe(self, params: MouseSwipeParams) -> bool:
+    def swipe(self, params: MouseSwipeParams) -> CommonResponse:
         """滑动"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_swipe,
-                                       self._device_id, params)
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_swipe,
+                             self._device_id, params)
 
-    def down(self, button: int = 1) -> bool:
-        """按下"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_down,
-                                       self._device_id, str(button))
-        return self._api.successful(ret)
-
-    def up(self, button: int = 1) -> bool:
+    def up(self, button: str) -> CommonResponse:
         """弹起"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_up,
-                                       self._device_id, str(button))
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_up,
+                             self._device_id, button)
 
-    def move(self, x: int, y: int) -> bool:
+    def down(self, button: str) -> CommonResponse:
+        """按下"""
+        return self._api.call(CommonResponse, self._api._payload.mouse_down,
+                             self._device_id, button)
+
+    def move(self, x: int, y: int) -> CommonResponse:
         """移动"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_move,
-                                       self._device_id, x, y)
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_move,
+                             self._device_id, x, y)
 
-    def reset(self) -> bool:
+    def reset(self) -> CommonResponse:
         """复位"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_reset,
-                                       self._device_id)
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_reset,
+                             self._device_id)
 
-    def wheel(self, direction: str, len, number: int) -> bool:
+    def wheel(self, direction: str, len: int, number: int) -> CommonResponse:
         """滚轮"""
-        ret = self._api._call_and_parse(CommonResponse, self._api._payload.mouse_wheel,
-                                       self._device_id, direction, len, number)
-        return self._api.successful(ret)
+        return self._api.call(CommonResponse, self._api._payload.mouse_wheel,
+                             self._device_id, direction, len, number)

@@ -12,22 +12,24 @@ class User:
 
     def get(self) -> Optional[UserData]:
         """获取imouse账号信息"""
-        ret = self._api._call_and_parse(UserResponse, self._api._payload.config_user_info)
-        if not self._api.successful(ret):
+        ret = self._api.call(UserResponse, self._api._payload.config_user_info)
+        if not (ret.status == 200 and ret.data.code == 0):
             return None
         return ret.data
 
     def login(self, user_name: str, password: str, utag: int) -> Optional[UserData]:
         """登录imouse账号"""
-        ret = self._api._call_and_parse(UserResponse, self._api._payload.config_user_login, user_name, password, utag)
-        if not self._api.successful(ret):
+        ret = self._api.call(UserResponse, self._api._payload.config_user_login, user_name, password, utag)
+        if not (ret.status == 200 and ret.data.code == 0):
             return None
         return ret.data
 
     def logout(self) -> bool:
         """退出imouse账号"""
-        return self._api.successful(self._api._call_and_parse(CommonResponse, self._api._payload.config_user_logout))
+        result = self._api.call(CommonResponse, self._api._payload.config_user_logout)
+        return result.status == 200 and result.data.code == 0
 
     def switch_utag(self, utag: int) -> bool:
         """切换imouse子账号"""
-        return self._api.successful(self._api._call_and_parse(CommonResponse, self._api._payload.config_user_switch, utag))
+        result = self._api.call(CommonResponse, self._api._payload.config_user_switch, utag)
+        return result.status == 200 and result.data.code == 0

@@ -12,11 +12,12 @@ class Usb:
 
     def get(self) -> List[UsbInfo]:
         """获取硬件列表"""
-        ret = self._api._call_and_parse(UsbListResponse, self._api._payload.config_usb_get)
-        if not self._api.successful(ret):
+        ret = self._api.call(UsbListResponse, self._api._payload.config_usb_get)
+        if not (ret.status == 200 and ret.data.code == 0):
             return []
         return ret.data.usb_list or []
 
     def restart(self, vpids: str) -> bool:
         """重启硬件"""
-        return self._api.successful(self._api._call_and_parse(CommonResponse, self._api._payload.device_usb_restart, vpids))
+        result = self._api.call(CommonResponse, self._api._payload.device_usb_restart, vpids)
+        return result.status == 200 and result.data.code == 0

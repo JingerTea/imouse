@@ -12,23 +12,23 @@ class Config:
     
     def _get_imserver_config(self):
         """Get ImServer config"""
-        ret = self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_get)
-        if self._api.successful(ret):
+        ret = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_get)
+        if ret.status == 200 and ret.data.code == 0:
             return ret.data
         return None
 
     @property
     def device_sort(self) -> Optional[DeviceSortData]:
         """获取设备列表排序"""
-        ret = self._api._call_and_parse(DeviceSortResponse, self._api._payload.device_sort_get)
-        if not self._api.successful(ret):
+        ret = self._api.call(DeviceSortResponse, self._api._payload.device_sort_get)
+        if not (ret.status == 200 and ret.data.code == 0):
             return None
         return ret.data
 
     def set_device_sort(self, index, value: int) -> Optional[DeviceSortData]:
         """设置设备列表排序"""
-        ret = self._api._call_and_parse(DeviceSortResponse, self._api._payload.device_sort_set, index, value)
-        if not self._api.successful(ret):
+        ret = self._api.call(DeviceSortResponse, self._api._payload.device_sort_set, index, value)
+        if not (ret.status == 200 and ret.data.code == 0):
             return None
         return ret.data
 
@@ -46,7 +46,8 @@ class Config:
         """设置控制台语言"""
         config = self._get_imserver_config()
         config.lang = value
-        if not self._api.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config)):
+        result = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        if not (result.status == 200 and result.data.code == 0):
             raise ValueError("语言设置失败")
 
     @property
@@ -59,24 +60,28 @@ class Config:
         """设置是否自动升级"""
         config = self._get_imserver_config()
         config.auto_update = state
-        return self._api.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
+        result = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        return result.status == 200 and result.data.code == 0
 
 
     def thread_mode(self,state: bool)->bool:
         """设置启用线程模式批量控制"""
         config = self._get_imserver_config()
         config.thread_mode = state
-        return self._api.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
+        result = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        return result.status == 200 and result.data.code == 0
 
     def mouse_mode(self,state: bool)->bool:
         """设置是否使用快准狠鼠标模式"""
         config = self._get_imserver_config()
         config.mouse_mode = state
-        return self._api.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
+        result = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        return result.status == 200 and result.data.code == 0
 
     def flip_right(self,state: bool)->bool:
         """设置横屏向右翻转"""
         config = self._get_imserver_config()
         config.flip_right = state
-        return self._api.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
+        result = self._api.call(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        return result.status == 200 and result.data.code == 0
 

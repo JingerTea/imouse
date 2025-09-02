@@ -64,8 +64,8 @@ class Device:
         从服务器重新获取设备信息，并更新内部缓存。
         当设备状态发生变化时（如分辨率、名称等），可调用此方法同步最新信息。
         """
-        ret = self._api._call_and_parse(DeviceListResponse, self._api._payload.device_get, self.device_id)
-        if self._api.successful(ret) and ret.data and len(ret.data.device_list) > 0:
+        ret = self._api.call(DeviceListResponse, self._api._payload.device_get, self.device_id)
+        if ret.status == 200 and ret.data.code == 0 and ret.data.device_list and len(ret.data.device_list) > 0:
             self._device_info = ret.data.device_list[0]
 
     @property
