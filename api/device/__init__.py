@@ -3,6 +3,7 @@ from .image import Image
 from .keyboard import KeyBoard
 from .mouse import Mouse
 from .shortcut import Shortcut
+from .action import Action
 from ...models import DeviceInfo, DeviceListResponse
 
 if TYPE_CHECKING:
@@ -30,7 +31,7 @@ class Device:
         return Mouse(self)
 
     @property
-    def key_board(self) -> KeyBoard:
+    def keyboard(self) -> KeyBoard:
         """
         获取键盘控制接口。
 
@@ -58,6 +59,16 @@ class Device:
             Shortcut: 当前设备的快捷指令对象，可用于执行快捷指令里面传输照片、剪切板共享等操作。
         """
         return Shortcut(self)
+
+    @property
+    def action(self) -> Action:
+        """
+        获取自定义动作接口。
+
+        Returns:
+            Action: 当前设备的自定义动作对象，可用于执行标签页切换等复合操作。
+        """
+        return Action(self)
 
     def refresh(self):
         """

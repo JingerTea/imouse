@@ -119,6 +119,10 @@ class Payload:
         return self._build_payload('/key/sendhid',
                                    {"id": device_id, "list": command_list}, data)
 
+    def key_sendhidkey(self, device_id: str, key_actions: List[dict], data: dict = None) -> dict:
+        return self._build_payload('/key/sendhidkey',
+                                   {"id": device_id, "list": key_actions}, data)
+
     def pic_screenshot(self, device_id: str, is_jpg: bool, rect: List[int], data: dict = None) -> dict:
         return self._build_payload('/pic/screenshot',
                                    {"id": device_id, "jpg": is_jpg, "rect": rect, "binary": True}, data)
