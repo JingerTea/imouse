@@ -5,6 +5,7 @@ from ..shared.client import Client
 from ..shared.payload import Payload
 from ..shared.base_api import BaseAPI
 from ..imouse_types import ModeType
+from ..utils.utils import format_device_info
 
 
 class API(BaseAPI):
@@ -25,17 +26,16 @@ class API(BaseAPI):
     @property
     def console(self):
         return Console(self)
-
     
-    def device(self, device_id: str, device_info: DeviceInfo = None):
-        return Device(self, device_id, device_info)
+    def device(self, device_id: str):
+        return Device(self, device_id)
 
-    @property
     def devices(self):
         device_list_response = self.call(DeviceListResponse, self._payload.device_get)
         if device_list_response.status != 200 or device_list_response.data.code != 0:
             return []
-        ret = []
-        for data in device_list_response.data.device_list:
-            ret.append(self.device('', data))
-        return ret
+
+        devices = []
+        for device_info in device_list_response.data.device_list:
+            devices.append(format_device_info(device_info))
+        return devices

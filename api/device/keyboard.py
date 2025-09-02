@@ -49,6 +49,12 @@ class KeyBoard:
                 "key": key
             })
         
+        # Add final action to lift all keys
+        actions.append({
+            "delayed": delay,
+            "key": ""
+        })
+        
         return self._api.call(CommonResponse, self._api._payload.key_sendhidkey,
                              self._device_id, actions)
 

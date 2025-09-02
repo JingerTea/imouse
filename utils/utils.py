@@ -5,7 +5,7 @@ from typing import TypeVar, Optional, Type
 
 from pydantic import BaseModel, ValidationError
 
-from ..models import CommonResponse
+from ..models import DeviceInfo
 from ..utils import logger
 
 T = TypeVar('T', bound=BaseModel)
@@ -58,5 +58,28 @@ def safe_json_log(json_str: str, prefix: str = '') -> str:
         return f'{prefix}\n' + json.dumps(obj, ensure_ascii=False)
     except Exception:
         return f'{prefix}\n' + clean_surrogates(json_str)
+
+
+def format_device_info(device_info: DeviceInfo) -> dict:
+    """
+    将 DeviceInfo 对象格式化为统一的字典格式
+    
+    Args:
+        device_info: 设备信息对象
+        
+    Returns:
+        dict: 格式化后的设备信息字典
+    """
+    return {
+        'id': device_info.device_id,
+        'name': device_info.device_name,
+        'nickname': device_info.name,
+        'model': device_info.model,
+        'ip': device_info.ip,
+        'version': device_info.version,
+        'width': device_info.width,
+        'height': device_info.height,
+        'state': device_info.state,
+    }
 
 

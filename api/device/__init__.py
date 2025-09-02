@@ -3,21 +3,19 @@ from .image import Image
 from .keyboard import KeyBoard
 from .mouse import Mouse
 from .shortcut import Shortcut
-from .action import Action
+from .command import Command
 from ...models import DeviceInfo, DeviceListResponse
+from ...utils.utils import format_device_info
 
 if TYPE_CHECKING:
     from .. import API
 
 
 class Device:
-    def __init__(self, api: "API", device_id: str, device_info: DeviceInfo = None):
+    def __init__(self, api: "API", id: str):
         self._api = api
-        self._device_info = device_info
-        if self._device_info:
-            self.id = self._device_info.device_id
-        else:
-            self.id = device_id
+        self.id = id
+        self._device_info = None
 
 
     @property
@@ -61,14 +59,14 @@ class Device:
         return Shortcut(self)
 
     @property
-    def action(self) -> Action:
+    def command(self) -> Command:
         """
         获取自定义动作接口。
 
         Returns:
-            Action: 当前设备的自定义动作对象，可用于执行标签页切换等复合操作。
+            Command: 当前设备的自定义动作对象，可用于执行标签页切换等复合操作。
         """
-        return Action(self)
+        return Command(self)
 
     def refresh(self):
         """
@@ -97,15 +95,7 @@ class Device:
         返回设备的字符串表示。
         """
         if self._device_info:
-            return str({
-                'name': self._device_info.device_name,
-                'model': self._device_info.model,
-                'ip': self._device_info.ip,
-                'id': self.id,
-                'version': self._device_info.version,
-                'width': self._device_info.width,
-                'height': self._device_info.height
-            })
+            return str(format_device_info(self._device_info))
         return str({'id': self.id})
 
     def __repr__(self) -> str:
