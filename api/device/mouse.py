@@ -11,7 +11,7 @@ class Mouse:
     def __init__(self, device: "Device"):
         self._device = device
         self._api = device._api
-        self._device_id = device.device_id
+        self._device_id = device.id
 
     def click(self, button: str, x: int, y: int, time: int = 0) -> CommonResponse:
         """点击"""

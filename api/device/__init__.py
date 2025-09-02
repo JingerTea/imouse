@@ -15,9 +15,9 @@ class Device:
         self._api = api
         self._device_info = device_info
         if self._device_info:
-            self.device_id = self._device_info.device_id
+            self.id = self._device_info.device_id
         else:
-            self.device_id = device_id
+            self.id = device_id
 
 
     @property
@@ -75,7 +75,7 @@ class Device:
         从服务器重新获取设备信息，并更新内部缓存。
         当设备状态发生变化时（如分辨率、名称等），可调用此方法同步最新信息。
         """
-        ret = self._api.call(DeviceListResponse, self._api._payload.device_get, self.device_id)
+        ret = self._api.call(DeviceListResponse, self._api._payload.device_get, self.id)
         if ret.status == 200 and ret.data.code == 0 and ret.data.device_list and len(ret.data.device_list) > 0:
             self._device_info = ret.data.device_list[0]
 
@@ -91,3 +91,25 @@ class Device:
         if self._device_info is None:
             self.refresh()
         return self._device_info
+
+    def __str__(self) -> str:
+        """
+        返回设备的字符串表示。
+        """
+        if self._device_info:
+            return str({
+                'name': self._device_info.device_name,
+                'model': self._device_info.model,
+                'ip': self._device_info.ip,
+                'id': self.id,
+                'version': self._device_info.version,
+                'width': self._device_info.width,
+                'height': self._device_info.height
+            })
+        return str({'id': self.id})
+
+    def __repr__(self) -> str:
+        """
+        返回设备的详细字符串表示。
+        """
+        return self.__str__()

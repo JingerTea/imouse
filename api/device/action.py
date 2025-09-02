@@ -9,7 +9,7 @@ class Action:
     def __init__(self, device: "Device"):
         self._device = device
         self._api = device._api
-        self._device_id = device.device_id
+        self._device_id = device.id
 
 
     # Basic actions

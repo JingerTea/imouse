@@ -11,7 +11,7 @@ class Shortcut:
     def __init__(self, device: "Device"):
         self._device = device
         self._api = device._api
-        self._device_id = device.device_id
+        self._device_id = device.id
 
     def album_get(self, album_name: str = "", num: int = 20, outtime: int = 15) -> AlbumFileResponse:
         """获取相册列表"""
