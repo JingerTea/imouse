@@ -15,6 +15,53 @@ class BaseAPI(ABC):
     def __init__(self):
         self._client: Optional[Client] = None
         self._payload: Optional[Payload] = None
+        self._error_code: Optional[int] = None
+        self._error_msg: Optional[str] = None
+    
+    def _set_error(self, code: int, message: str):
+        """Set error code and message"""
+        self._error_code = code
+        self._error_msg = message
+
+    def _clear_error(self):
+        """Clear error code and message"""
+        self._error_code = None
+        self._error_msg = None
+
+    def successful(self, common_response):
+        """Check if API response is successful"""
+        try:
+            if common_response is None:
+                self._set_error(-1, "响应为空")
+                return False
+                
+            if common_response.status != 200:
+                self._set_error(common_response.status, common_response.message)
+                return False
+
+            if common_response.data.code != 0:
+                self._set_error(common_response.data.code, common_response.data.message)
+                return False
+
+            self._clear_error()
+            return True
+        except Exception as e:
+            self._set_error(-1, f"解析响应失败: {e}")
+            return False
+
+    @property
+    def error_code(self) -> Optional[int]:
+        """Get and clear error code"""
+        ret = self._error_code
+        self._error_code = None
+        return ret
+
+    @property
+    def error_msg(self) -> Optional[str]:
+        """Get and clear error message"""
+        ret = self._error_msg
+        self._error_msg = None
+        return ret
     
     def _make_request(self, payload_data: dict, timeout: int = 0, is_async: bool = False) -> Union[str, bytes, None]:
         """

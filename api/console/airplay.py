@@ -1,18 +1,14 @@
 from typing import TYPE_CHECKING, List
-from ...types import SetDeviceAirplayParams
-from ...shared.base_api import BaseAPI
+from ...imouse_types import SetDeviceAirplayParams
 from ...models import ImServerConfigResponse, CommonResponse
 
 if TYPE_CHECKING:
-    from . import Console
+    from .. import API
 
 
-class AirPlay(BaseAPI):
-    def __init__(self, console: "Console"):
-        super().__init__()
-        self._console = console
-        self._client = console._helper._client
-        self._payload = console._helper._payload
+class AirPlay:
+    def __init__(self, api: "API"):
+        self._api = api
 
     def global_config(
             self,
@@ -22,7 +18,12 @@ class AirPlay(BaseAPI):
             img_fps: int = None
     ) -> bool:
         """设置 iMouse 全局 AirPlay 配置（用于所有设备默认使用）"""
-        config = self._console.get_imserver_config
+        # Get current config directly via API
+        config_response = self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_get)
+        if not config_response or not config_response.data:
+            return False
+        
+        config = config_response.data
         update_map = {
             'air_play_fps': fps,
             'air_play_ratio': ratio,
@@ -32,7 +33,9 @@ class AirPlay(BaseAPI):
         for key, value in update_map.items():
             if value is not None:
                 setattr(config, key, value)
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        
+        result = self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config)
+        return result is not None and result.status == 200 and result.data and result.data.code == 0
 
     def config(
             self,
@@ -51,43 +54,45 @@ class AirPlay(BaseAPI):
             audio=audio,
             img_fps=img_fps
         )
-        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_set, device_ids, params))
+        result = self._api._call_and_parse(CommonResponse, self._api._payload.device_airplay_set, device_ids, params)
+        return result is not None and result.status == 200 and result.data and result.data.code == 0
 
     def connect(self, device_ids: str) -> bool:
         """指定设备的投屏"""
-        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_connect, device_ids))
+        result = self._api._call_and_parse(CommonResponse, self._api._payload.device_airplay_connect, device_ids)
+        return result is not None and result.status == 200 and result.data and result.data.code == 0
 
     def connect_all(self) -> bool:
         """让所有离线的设备投屏"""
-        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_connect_all))
+        return self._console.successful(self._api._call_and_parse(CommonResponse, self._api._payload.device_airplay_connect_all))
 
     def disconnect(self, device_ids: str) -> bool:
         """断开指定设备的投屏"""
-        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.device_airplay_disconnect, device_ids))
+        return self._console.successful(self._api._call_and_parse(CommonResponse, self._api._payload.device_airplay_disconnect, device_ids))
 
     def name(self, name: str) -> bool:
         """设置 AirPlay 的显示名称"""
         config = self._console.get_imserver_config
         config.air_play_name = name
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        return self._console.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
 
     def auto_connect(self, state: bool) -> bool:
         """设置是否自动连接设备"""
         config = self._console.get_imserver_config
         config.auto_connect = state
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        return self._console.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
 
     def failed_retry(self, num: int) -> bool:
         """设置连接失败后的重试次数"""
         config = self._console.get_imserver_config
         config.connect_failed_retry = num
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        return self._console.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
 
     def gpu_decoding(self, state: bool) -> bool:
         """设置是否启用 GPU 硬件解码"""
         config = self._console.get_imserver_config
         config.enable_hardware_acceleration = state
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        return self._console.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
 
     def set_mdns_type(self, mdns_type: int, ip_list: List[str] = None) -> bool:
         """设置 mDNS 类型及允许的 IP 列表"""
@@ -96,8 +101,8 @@ class AirPlay(BaseAPI):
         if ip_list is not None:
             config.allow_ip_list = ip_list
 
-        return self._console.successful(self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, config))
+        return self._console.successful(self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, config))
 
     def restart_mdns(self) -> bool:
         """重新广播投屏"""
-        return self._console.successful(self._call_and_parse(CommonResponse, self._payload.imserver_regmdns))
+        return self._console.successful(self._api._call_and_parse(CommonResponse, self._api._payload.imserver_regmdns))

@@ -131,7 +131,7 @@ class ImServerConfigData(CommonResData):
     air_play_port: Optional[int] = None
     air_play_audio: Optional[bool] = None
     auto_connect: Optional[bool] = None
-    auto_updata: Optional[bool] = None
+    auto_update: Optional[bool] = None
     thread_mode: Optional[bool] = None
     mouse_mode: Optional[bool] = None
     flip_right: Optional[bool] = None

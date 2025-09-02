@@ -1,6 +1,8 @@
 from enum import Enum
-from typing import TypedDict, List, Union
+from typing import TypedDict, List, Literal
 
+# Type alias for mode parameter
+ModeType = Literal["http", "websocket"]
 
 class SetDeviceParams(TypedDict, total=False):
     name: str

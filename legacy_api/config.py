@@ -1,38 +1,32 @@
-from abc import abstractmethod
-from typing import Optional, Union
+from typing import Optional, Union, TYPE_CHECKING
 
 from ..models import UsbListResponse, ImServerConfigResponse, ImServerConfigData, CommonResponse
-from ..shared.base_api import BaseAPI
-from ..shared.payload import Payload
+
+if TYPE_CHECKING:
+    from . import LegacyAPI
 
 
-class Config(BaseAPI):
-    def __init__(self):
-        super().__init__()
-        if not hasattr(self, '_payload'):
-            self._payload = self._get_payload()
-
-    @abstractmethod
-    def _get_payload(self) -> Payload:
-        pass
+class Config:
+    def __init__(self, api: "LegacyAPI"):
+        self._api = api
 
 
     def config_usb_get(self) -> Optional[UsbListResponse]:
         """https://www.imouse.cc/XP%E7%89%88API%E6%96%87%E6%A1%A3/%E9%85%8D%E7%BD%AE%E7%9B%B8%E5%85%B3/%E8%8E%B7%E5%8F%96%E5%B7%B2%E8%BF%9E%E6%8E%A5%E7%A1%AC%E4%BB%B6%E5%88%97%E8%A1%A8"""
-        return self._call_and_parse(UsbListResponse, self._payload.config_usb_get)
+        return self._api._call_and_parse(UsbListResponse, self._api._payload.config_usb_get)
 
     def config_imserver_get(self) -> Optional[ImServerConfigResponse]:
         """https://www.imouse.cc/XP%E7%89%88API%E6%96%87%E6%A1%A3/%E9%85%8D%E7%BD%AE%E7%9B%B8%E5%85%B3/%E8%8E%B7%E5%8F%96%E5%86%85%E6%A0%B8%E9%85%8D%E7%BD%AE"""
-        return self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_get)
+        return self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_get)
 
     def config_imserver_set(self,params: ImServerConfigData) -> Optional[ImServerConfigResponse]:
         """https://www.imouse.cc/XP%E7%89%88API%E6%96%87%E6%A1%A3/%E9%85%8D%E7%BD%AE%E7%9B%B8%E5%85%B3/%E8%AE%BE%E7%BD%AE%E5%86%85%E6%A0%B8%E9%85%8D%E7%BD%AE"""
-        return self._call_and_parse(ImServerConfigResponse, self._payload.config_imserver_set, params)
+        return self._api._call_and_parse(ImServerConfigResponse, self._api._payload.config_imserver_set, params)
 
     def imserver_regmdns(self) -> Optional[CommonResponse]:
         """https://www.imouse.cc/XP%E7%89%88API%E6%96%87%E6%A1%A3/%E9%85%8D%E7%BD%AE%E7%9B%B8%E5%85%B3/%E9%87%8D%E6%96%B0%E5%B9%BF%E6%92%AD%E6%8A%95%E5%B1%8F"""
-        return self._call_and_parse(CommonResponse, self._payload.imserver_regmdns)
+        return self._api._call_and_parse(CommonResponse, self._api._payload.imserver_regmdns)
 
     def imserver_restart(self) -> Optional[CommonResponse]:
         """https://www.imouse.cc/XP%E7%89%88API%E6%96%87%E6%A1%A3/%E9%85%8D%E7%BD%AE%E7%9B%B8%E5%85%B3/%E9%87%8D%E5%90%AF%E5%86%85%E6%A0%B8"""
-        return self._call_and_parse(CommonResponse, self._payload.imserver_restart)
+        return self._api._call_and_parse(CommonResponse, self._api._payload.imserver_restart)

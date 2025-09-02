@@ -3,7 +3,7 @@ from threading import RLock
 
 from ..models import DeviceListResponse, DeviceListData, GroupListData, UsbListData, UserData, \
     ImServerConfigResponse, ImServerConfigData
-from ..types import EventConstant
+from ..imouse_types import EventConstant
 from ..utils.utils import parse_model
 
 

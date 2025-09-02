@@ -1,64 +1,23 @@
-import json
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from .image import Image
 from .keyboard import KeyBoard
 from .mouse import Mouse
 from .shortcut import Shortcut
 from ...models import DeviceInfo, DeviceListResponse
-from ...shared.payload import Payload
-from ...utils.utils import parse_model
 
 if TYPE_CHECKING:
-    from . import Helper
+    from .. import API
 
 
 class Device:
-    def __init__(self, helper: "Helper", device_id: str, device_info: DeviceInfo = None):
-        self._helper = helper
-        self._client = helper._client
-        self._payload = helper._payload
+    def __init__(self, api: "API", device_id: str, device_info: DeviceInfo = None):
+        self._api = api
         self._device_info = device_info
         if self._device_info:
             self.device_id = self._device_info.device_id
         else:
             self.device_id = device_id
-        self._error_code: Optional[int] = None
-        self._error_msg: Optional[str] = None
 
-    def _set_error(self, code: int, message: str):
-        self._error_code = code
-        self._error_msg = message
-
-    def _clear_error(self):
-        self._error_code = None
-        self._error_msg = None
-
-    def successful(self, common_response):
-        try:
-            if common_response.status != 200:
-                self._set_error(common_response.status, common_response.message)
-                return False
-
-            if common_response.data.code != 0:
-                self._set_error(common_response.data.code, common_response.data.message)
-                return False
-            self._clear_error()
-            return True
-        except Exception as e:
-            self._set_error(-1, f"解析响应失败: {e}")
-            return False
-
-    @property
-    def error_code(self) -> Optional[int]:
-        ret = self._error_code
-        self._error_code = None
-        return ret
-
-    @property
-    def error_msg(self) -> Optional[str]:
-        ret = self._error_msg
-        self._error_msg = None
-        return ret
 
     @property
     def mouse(self) -> Mouse:
@@ -105,11 +64,8 @@ class Device:
         从服务器重新获取设备信息，并更新内部缓存。
         当设备状态发生变化时（如分辨率、名称等），可调用此方法同步最新信息。
         """
-        response = self._client._network_request(
-            json.dumps(self._payload.device_get(self.device_id))
-        )
-        ret = parse_model(DeviceListResponse, json.loads(response))
-        if self.successful(ret) and len(ret.data.device_list) > 0:
+        ret = self._api._call_and_parse(DeviceListResponse, self._api._payload.device_get, self.device_id)
+        if self._api.successful(ret) and ret.data and len(ret.data.device_list) > 0:
             self._device_info = ret.data.device_list[0]
 
     @property

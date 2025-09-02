@@ -1,32 +1,27 @@
 from typing import TYPE_CHECKING, List, Optional
 
 from ...models import GroupInfo, GroupListResponse, IdListResponse
-from ...shared.base_api import BaseAPI
 
 if TYPE_CHECKING:
-    from . import Console
+    from .. import API
 
 
-class Group(BaseAPI):
-    def __init__(self, console: "Console"):
-        super().__init__()
-        self._console = console
-        self._client = console._helper._client
-        self._payload = console._helper._payload
+class Group:
+    def __init__(self, api: "API"):
+        self._api = api
 
     def get(self, gids: str = "") -> List[GroupInfo]:
         """获取分组"""
-        ret = self._call_and_parse(GroupListResponse, self._payload.device_group_get, gids)
-        if not self._console.successful(ret):
+        ret = self._api._call_and_parse(GroupListResponse, self._api._payload.device_group_get, gids)
+        if not self._api.successful(ret):
             return []
-        result_list = ret.data.group_list if ret.data and ret.data.group_list else []
-        return result_list
+        return ret.data.group_list or []
 
 
     def set(self, gid: str, name: str) -> Optional[GroupInfo]:
         """设置分组"""
-        ret = self._call_and_parse(GroupListResponse, self._payload.device_group_set, gid, name)
-        if self._console.successful(ret):
+        ret = self._api._call_and_parse(GroupListResponse, self._api._payload.device_group_set, gid, name)
+        if self._api.successful(ret):
             if len(ret.data.group_list) == 0:
                 return None
             return ret.data.group_list[0]
@@ -38,8 +33,8 @@ class Group(BaseAPI):
 
     def delete(self, gids: str) -> Optional[List[str]]:
         """删除分组"""
-        ret = self._call_and_parse(IdListResponse, self._payload.device_group_del, gids)
-        if not self._console.successful(ret):
+        ret = self._api._call_and_parse(IdListResponse, self._api._payload.device_group_del, gids)
+        if not self._api.successful(ret):
             return []
         result_list = ret.data.id_list if ret.data and ret.data.id_list else []
         return result_list

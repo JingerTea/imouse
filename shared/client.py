@@ -9,18 +9,22 @@ from websocket import WebSocketApp, WebSocketException
 
 from ..utils import logger
 from ..utils.utils import safe_json_log
+from ..imouse_types import ModeType
 
 
 class Client:
     __metaclass__ = abc.ABCMeta
 
-    def __init__(self, host: str, port: int, timeout: int = 15):
+    def __init__(self, host: str, port: int, timeout: int = 15, mode: ModeType = "websocket"):
         """
         初始化 Client 类。
 
         :param host: 主机地址。
+        :param port: 端口号。
         :param timeout: 网络请求超时时间。
+        :param mode: 通信模式，可选值: "http", "websocket"。默认为 "websocket"。
         """
+        self.mode = mode
         self._global_timeout = timeout
         self.host = host
         self.port = port
@@ -31,16 +35,23 @@ class Client:
 
     def start(self):
         """启动网络通信。"""
-        self._is_working = True
-        t1 = threading.Thread(target=self._initialize_websocket, name='WebSocket 初始化')
-        logger.info("启动网络通信")
-        t1.start()
+        if self.mode == "websocket":
+            self._is_working = True
+            t1 = threading.Thread(target=self._initialize_websocket, name='WebSocket 初始化')
+            logger.info("启动网络通信")
+            t1.start()
+        else:
+            # HTTP mode - no persistent connection needed
+            self._is_connected = True
+            logger.info("HTTP 模式启动")
 
     def stop(self):
         """停止网络通信。"""
         self._is_working = False
-        if self._is_connected:
+        if self.mode == "websocket" and self._is_connected:
             self._ws.close()
+        elif self.mode == "http":
+            self._is_connected = False
 
     def is_connected(self) -> bool:
         """返回网络是否已连接。"""
@@ -52,17 +63,17 @@ class Client:
 
         :param data: 要发送的数据。
         :param timeout: 超时时间。
+        :param is_async: 是否异步请求（仅在websocket模式下有效）。
         :return: 响应数据。
         """
         ret = None
         try:
             if timeout == 0:
                 timeout = self._global_timeout
-            if is_async:
-                logger.debug(f'webscoket请求，timeout={timeout}: \r\n' + data)
-                self._ws.send(data)
-            else:
-                logger.debug(safe_json_log(data, '请求:->'))
+            
+            # Force HTTP mode or handle async WebSocket requests
+            if self.mode == "http" or not is_async:
+                logger.debug(safe_json_log(data, 'HTTP请求:->'))
                 ret = requests.post(self.base_url, json=json.loads(data), timeout=timeout)
                 if ret.status_code == 200:
                     content_type = ret.headers.get("Content-Type", "")
@@ -75,20 +86,33 @@ class Client:
                     data_dict = {"data": {"code": 33, "id": "", "message": "失败"}, "status": ret.status_code, "msgid": 0,
                                  'fun': json.loads(data).get('fun'), 'message': '请求失败'}
                     ret = json.dumps(data_dict)
+            elif self.mode == "websocket" and is_async:
+                if not self._is_connected:
+                    raise RuntimeError("WebSocket 连接未建立，无法发送异步请求")
+                logger.debug(f'WebSocket请求，timeout={timeout}: \r\n' + data)
+                self._ws.send(data)
+            else:
+                raise ValueError("无效的请求模式配置")
+                
         except requests.exceptions.RequestException as e:
             logger.error(f'网络请求错误: {e}')
             data_dict = {"data": {"code": 33, "id": "", "message": "失败"}, "status": 400, "msgid": 0,
                          'fun': json.loads(data).get('fun'), 'message': '网络请求错误'}
             ret = json.dumps(data_dict)
+        except Exception as e:
+            logger.error(f'请求异常: {e}')
+            data_dict = {"data": {"code": 33, "id": "", "message": "失败"}, "status": 500, "msgid": 0,
+                         'fun': json.loads(data).get('fun'), 'message': str(e)}
+            ret = json.dumps(data_dict)
         return ret
 
-    @abc.abstractmethod
     def _handle_message(self, message: str):
         """
-        抽象方法，处理接收到的消息。
+        处理接收到的消息的默认实现（可以被子类重写）。
 
         :param message: 接收到的消息。
         """
+        # Default implementation does nothing - suitable for request/response only usage
         pass
 
     def _on_data(self, ws, message, data_type, continue_flag):
