@@ -54,54 +54,54 @@ class Command:
         self._device.keyboard.send_fn_key(" ")
 
     def go_back(self):
-        self._device.keyboard.send_fn_key("tab+b")
+        self._device.keyboard.send_hid_key("tab+b")
 
     def contextual_menu(self):
-        self._device.keyboard.send_fn_key("tab+m")
+        self._device.keyboard.send_hid_key("tab+m")
 
     def actions(self):
-        self._device.keyboard.send_fn_key("tab+z")
+        self._device.keyboard.send_hid_key("tab+z")
 
     # device commands
     def home(self):
-        self._device.keyboard.send_fn_key("fn+h")
+        self._device.keyboard.send_hid_key("win+h")
 
     def app_switcher(self):
-        self._device.keyboard.send_fn_key("fn+uparrow")
+        self._device.keyboard.send_fn_key("AppSwitch")
 
     def control_center(self):
-        self._device.keyboard.send_fn_key("fn+c")
+        self._device.keyboard.send_fn_key("ControlBar")
 
     def notification_center(self):
-        self._device.keyboard.send_fn_key("fn+n")
+        self._device.keyboard.send_fn_key("NoticeBar")
 
     def lock_screen(self):
-        self._device.keyboard.send_fn_key("tab+l")
+        self._device.keyboard.send_hid_key("tab+l")
 
     def restart(self):
-        self._device.keyboard.send_fn_key("ctrl+alt+shift+win+r")
+        self._device.keyboard.send_hid_key("ctrl+alt+shift+win+r")
 
     def siri(self):
-        self._device.keyboard.send_fn_key("fn+s")
+        self._device.keyboard.send_hid_key("fn+s")
 
     def accessibility_shortcut(self):
-        self._device.keyboard.send_fn_key("tab+x")
+        self._device.keyboard.send_hid_key("tab+x")
 
     def sos(self):
-        self._device.keyboard.send_fn_key("ctrl+alt+shift+win+s")
+        self._device.keyboard.send_hid_key("ctrl+alt+shift+win+s")
 
     def rotate_device(self):
-        self._device.keyboard.send_fn_key("tab+r")
+        self._device.keyboard.send_hid_key("tab+r")
 
     def analytics(self):
-        self._device.keyboard.send_fn_key("ctrl+alt+shift+win+.")
+        self._device.keyboard.send_hid_key("ctrl+alt+shift+win+.")
 
     def pass_through_mode(self):
-        self._device.keyboard.send_fn_key("ctrl+alt+win+p")
+        self._device.keyboard.send_hid_key("ctrl+alt+win+p")
 
     # gestures commands
     def keyboard_gestures(self):
-        self._device.keyboard.send_fn_key("tab+g")
+        self._device.keyboard.send_hid_key("tab+g")
 
     # custom commands
     def spotlight(self):

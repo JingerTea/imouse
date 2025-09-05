@@ -26,19 +26,31 @@ class KeyBoard:
     def send_hid_key(self, keys: Union[str, List[str]], delay: int = 20) -> CommonResponse:
         """发送HID按键序列（自动处理修饰键）"""
         if isinstance(keys, str):
-            # 自动检测修饰键并创建序列
-            modifier_keys = ["ctrl", "shift", "alt", "win", "fn", "tab"]
+            # 检测所有修饰键
+            standard_modifiers = ["ctrl", "shift", "alt", "win", "fn"]
+            detected_modifiers = []
             
-            # 找到第一个（最高优先级）修饰键
-            first_modifier = None
-            for modifier in modifier_keys:
+            # 找到所有标准修饰键
+            for modifier in standard_modifiers:
                 if modifier + "+" in keys:
-                    first_modifier = modifier
-                    break
+                    detected_modifiers.append(modifier)
             
-            if first_modifier:
-                # 只按住第一个修饰键，再按组合键
-                keys = [first_modifier, keys]
+            # 特殊处理 tab 键
+            tab_detected = "tab+" in keys
+            if tab_detected:
+                # 如果 tab 与其他修饰键组合，tab 作为普通键
+                # 如果 tab 只与普通键组合，tab 作为修饰键
+                if detected_modifiers:
+                    # tab 与其他修饰键组合，tab 作为普通键，不加入修饰键列表
+                    pass
+                else:
+                    # tab 只与普通键组合，tab 作为修饰键
+                    detected_modifiers.append("tab")
+            
+            # 构建按键序列
+            if detected_modifiers:
+                # 先按住所有修饰键，然后按组合键
+                keys = detected_modifiers + [keys]
             else:
                 keys = [keys]
         
